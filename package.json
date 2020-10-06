@@ -1,0 +1,84 @@
+{
+  "name": "node-ts",
+  "version": "0.0.2",
+  "description": "Template project using Node.js + TypeScript",
+  "main": "./src/server.ts",
+  "scripts": {
+    "start": "nodemon src/server.ts",
+    "start:compiled": "npm run build:prod && node dist/server.js",
+    "postinstall": "npm run build:prod",
+    "prod": "node dist/server.js",
+    "build:prod": "tsc -p .",
+    "deploy:heroku": "npm run build:prod && yes | cp -a dist/. ../stock-chat-api/ && cd ../stock-chat-api/ && git add . && git commit -m 'Heroku deploy.' && git push && cd ../node-ts",
+    "prod-test": "node server.js",
+    "build:prod-test": "tsc -p . && ts-node util/prod-env.ts production && npx prettier --write ./production/",
+    "build_webpacked_prod": "npm run build:prod && webpack -p",
+    "tsc": "tsc",
+    "lint": "eslint .",
+    "format": "eslint . --fix"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/magluf/node-ts.git"
+  },
+  "engines": {
+    "node": "12.x"
+  },
+  "keywords": [
+    "nodejs",
+    "node",
+    "javascript",
+    "js",
+    "typescript"
+  ],
+  "author": "Sergio Magluf",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/magluf/node-ts/issues"
+  },
+  "homepage": "https://github.com/magluf/node-ts#readme",
+  "dependencies": {
+    "bcrypt": "^5.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongodb": "^3.6.2",
+    "mongoose": "^5.10.7"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^8.5.0",
+    "@types/bcrypt": "^3.0.0",
+    "@types/cors": "^2.8.7",
+    "@types/express": "^4.17.8",
+    "@types/mongodb": "^3.5.27",
+    "@types/mongoose": "^5.7.36",
+    "@types/node": "^14.11.2",
+    "@typescript-eslint/eslint-plugin": "^4.3.0",
+    "@typescript-eslint/parser": "^4.3.0",
+    "colors": "^1.4.0",
+    "eslint": "^7.10.0",
+    "eslint-config-airbnb": "^18.2.0",
+    "eslint-config-prettier": "^6.12.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-react": "^7.21.3",
+    "eslint-plugin-react-hooks": "^4.1.2",
+    "husky": "^4.3.0",
+    "nodemon": "^2.0.4",
+    "prettier": "^2.1.2",
+    "ts-node": "^8.10.2",
+    "tsc": "^1.20150623.0",
+    "typescript": "^3.9.7",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12",
+    "webpack-node-externals": "^2.5.2"
+  }
+}
