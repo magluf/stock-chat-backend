@@ -1,7 +1,7 @@
 // import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { promisify } from 'util';
-import { Response, CookieOptions } from 'express';
+import { Response, CookieOptions, Request } from 'express';
 import UserService from '../services/user.service';
 import { isDecryptionValid } from '../utils/encrypt.util';
 import HttpUtil from '../utils/http.util';
@@ -48,7 +48,7 @@ export const protect = async (req: any, res: any, next: any) => {
   }
 
   if (!token) {
-    httpUtil.setError(401, 'Please, log in to get access.');
+    httpUtil.setError(401, 'Not logged in.');
     return httpUtil.send(res);
   }
 
@@ -123,13 +123,18 @@ class AuthController {
     }
   }
 
-  static async logout(req: RequestWithBody<ILoginInfo>, res: Response) {
+  static async logout(req: Request, res: Response) {
     res.cookie('jwt', 'loggedout', {
       expires: new Date(Date.now() + 10 * 1000),
       httpOnly: true,
     });
 
     httpUtil.setSuccess(200, 'User logged out!');
+    return httpUtil.send(res);
+  }
+
+  static async isLoggedIn(req: Request, res: Response) {
+    httpUtil.setSuccess(200, 'User logged in!');
     return httpUtil.send(res);
   }
 }
