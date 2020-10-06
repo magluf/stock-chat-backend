@@ -134,8 +134,41 @@ class AuthController {
   }
 
   static async isLoggedIn(req: Request, res: Response) {
-    httpUtil.setSuccess(200, 'User logged in!');
-    return httpUtil.send(res);
+    const { authorization } = req.headers;
+    let token;
+    if (authorization && authorization.startsWith('Bearer')) {
+      token = authorization.split(' ')[1];
+    } else if (req.headers.cookie) {
+      token = req.headers.cookie.split('jwt=')[1];
+    }
+
+    if (!token) {
+      httpUtil.setError(401, 'Not logged in.');
+      return httpUtil.send(res);
+    }
+
+    try {
+      const decoded = await decodeJwt(token);
+
+      const user = await UserService.getUserById(decoded.id);
+      if (!user) {
+        httpUtil.setError(401, 'Invalid credentials.');
+        return httpUtil.send(res);
+      }
+
+      const { passwordChangedAt } = user;
+
+      if (checkForChangedPassword(decoded.iat, passwordChangedAt)) {
+        httpUtil.setError(401, 'Invalid credentials.');
+        return httpUtil.send(res);
+      }
+
+      httpUtil.setSuccess(200, 'User logged in!', user);
+      return httpUtil.send(res);
+    } catch (error) {
+      httpUtil.setError(401, error);
+      return httpUtil.send(res);
+    }
   }
 }
 
