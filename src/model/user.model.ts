@@ -5,18 +5,18 @@ const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 
 export interface IUser extends Document {
   username: string;
-  email: string;
+  email: string | undefined;
   password: string | undefined;
   passwordChangedAt?: Date;
   salt: string | undefined;
 }
 
-const userSchema: Schema = new Schema(
+export const userSchema: Schema = new Schema(
   {
     username: {
       type: String,
       required: 'Username is required.',
-      unique: true,
+      unique: true, // <- Mongo bug :(
     },
     email: {
       type: String,

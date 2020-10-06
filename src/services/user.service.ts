@@ -9,6 +9,10 @@ class UserService {
     return await User.findById(id);
   }
 
+  static async getUserForChannel(id: string) {
+    return await User.findById(id).select('+password +salt');
+  }
+
   static async getUserByUsername(username: string) {
     return await User.findOne({ username }).select('+password +salt');
   }
