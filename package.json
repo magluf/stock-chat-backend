@@ -10,6 +10,7 @@
     "prod": "node dist/server.js",
     "build:prod": "tsc -p .",
     "deploy:heroku": "npm run build:prod && yes | cp -a dist/. ../stock-chat-api/ && cd ../stock-chat-api/ && git add . && git commit -m 'Heroku deploy.' && git push && cd ../node-ts",
+    "push:deploy": "git push && npm run deploy:heroku",
     "prod-test": "node server.js",
     "build:prod-test": "tsc -p . && ts-node util/prod-env.ts production && npx prettier --write ./production/",
     "build_webpacked_prod": "npm run build:prod && webpack -p",
