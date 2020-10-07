@@ -9,7 +9,7 @@ class UserService {
     return await User.findById(id);
   }
 
-  static async getUserForChannel(id: string) {
+  static async getFullUser(id: string) {
     return await User.findById(id).select('+password +salt');
   }
 

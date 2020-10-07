@@ -4,7 +4,7 @@ import { encryptPassword, generateSalt } from '../utils/encrypt.util';
 const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 
 export interface IUser extends Document {
-  username: string;
+  username: string | undefined;
   email: string | undefined;
   password: string | undefined;
   passwordChangedAt?: Date;

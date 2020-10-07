@@ -20,7 +20,7 @@ class ChannelController {
     }
 
     try {
-      const creator = await UserService.getUserForChannel(
+      const creator = await UserService.getFullUser(
         (req.body.creator as unknown) as string,
       );
 
@@ -37,9 +37,11 @@ class ChannelController {
 
       const createdChannel = await ChannelService.createChannel(newChannel);
 
-      createdChannel.creator.password = undefined;
-      createdChannel.creator.salt = undefined;
-      createdChannel.creator.email = undefined;
+      if (createdChannel.creator) {
+        createdChannel.creator.password = undefined;
+        createdChannel.creator.salt = undefined;
+        createdChannel.creator.email = undefined;
+      }
 
       httpUtil.setSuccess(201, 'Channel Added!', createdChannel);
       return httpUtil.send(res);

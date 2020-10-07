@@ -2,12 +2,12 @@ import { Schema, model, Document } from 'mongoose';
 import { IUser, userSchema } from './user.model';
 
 export interface IChannel extends Document {
-  creator: IUser;
+  creator?: IUser;
   name: string;
   details: string;
 }
 
-const channelSchema: Schema = new Schema(
+export const channelSchema: Schema = new Schema(
   {
     creator: {
       type: userSchema,
