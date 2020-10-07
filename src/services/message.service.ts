@@ -9,6 +9,10 @@ class MessageService {
     return await Message.find();
   }
 
+  static async getMessagesByChannel(channelId: string) {
+    return await Message.find({ 'channel._id': channelId }).limit(50);
+  }
+
   static async getMessageById(id: string) {
     return await Message.findById(id);
   }

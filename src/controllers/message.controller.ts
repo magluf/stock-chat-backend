@@ -96,6 +96,23 @@ class MessageController {
       return httpUtil.send(res);
     }
   }
+
+  static async getMessagesByChannel(req: any, res: any) {
+    const { channelId } = req.params;
+
+    try {
+      const allMessages = await MessageService.getMessagesByChannel(channelId);
+      if (allMessages.length > 0) {
+        httpUtil.setSuccess(200, 'Messages retrieved.', allMessages);
+      } else {
+        httpUtil.setSuccess(200, 'No messages found.');
+      }
+      return httpUtil.send(res);
+    } catch (error) {
+      httpUtil.setError(400, error);
+      return httpUtil.send(res);
+    }
+  }
 }
 
 export default MessageController;

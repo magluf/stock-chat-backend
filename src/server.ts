@@ -24,8 +24,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/channel', channelRoutes);
-app.use('/api/v1/message', messageRoutes);
+app.use('/api/v1/channels', channelRoutes);
+app.use('/api/v1/messages', messageRoutes);
 app.use('/api/v1/auth', authRoutes);
 
 const PORT = process.env.PORT || 3001;

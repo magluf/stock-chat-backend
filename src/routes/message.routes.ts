@@ -9,6 +9,8 @@ router
   .post(protect, MessageController.createMessage)
   .get(protect, MessageController.getAllMessages);
 
-router.route('/:id').get(protect, MessageController.getMessage);
+router
+  .route('/:channelId')
+  .get(protect, MessageController.getMessagesByChannel);
 
 export default router;

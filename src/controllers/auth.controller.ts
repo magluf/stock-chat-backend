@@ -54,10 +54,8 @@ export const protect = async (req: any, res: any, next: any) => {
 
   try {
     const decoded = await decodeJwt(token);
-    console.log('protect -> decoded', decoded);
 
     const user = await UserService.getUserById(decoded.id);
-    console.log('protect -> user', user);
     if (!user) {
       httpUtil.setError(401, 'Invalid credentials.');
       return httpUtil.send(res);
