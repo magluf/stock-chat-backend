@@ -1,5 +1,5 @@
 import { Schema, model, Document } from 'mongoose';
-import { IUser, userSchema } from './user.model';
+import { IUser } from './user.model';
 
 export interface IChannel extends Document {
   creator?: IUser;
@@ -9,10 +9,6 @@ export interface IChannel extends Document {
 
 export const channelSchema: Schema = new Schema(
   {
-    creator: {
-      type: userSchema,
-      required: true,
-    },
     name: {
       type: String,
       required: 'Name is required.',
