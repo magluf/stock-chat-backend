@@ -1,7 +1,5 @@
 import { Request, Response } from 'express';
-import * as csvString from 'csv-string';
-import csvParser from 'csv-parser';
-// import fastCsv from 'fast-csv';
+import * as csv from 'csv-string';
 import { IChannel } from '../model/channel.model';
 import Message, { IMessage } from '../model/message.model';
 import ChannelService from '../services/channel.service';
@@ -13,17 +11,6 @@ import { RequestWithBody } from '../utils/interfaces';
 
 const httpUtil = new HttpUtil();
 
-/*
-{
-    "_id": "5f7d6a05151b8d1f19f21833",
-    "username": "StockBot",
-    "email": "stock@bot.app",
-    "createdAt": "2020-10-07T07:11:01.711Z",
-    "updatedAt": "2020-10-07T07:11:01.711Z",
-    "__v": 0
-}
-*/
-
 const initiateStockBot = async (
   author: string,
   channel: IChannel,
@@ -32,40 +19,65 @@ const initiateStockBot = async (
   const botUser = await UserService.getFullUser(
     process.env.STOCK_BOT_ID as string,
   );
-  const botMessage = new Message({
+  let botMessage = new Message({
     author: botUser,
     channel: channel,
     content: '',
   });
 
+  const messageByStockBot = async (text: string) => {
+    botMessage = new Message({
+      author: botUser,
+      channel: channel,
+      content: text,
+    });
+    return await MessageService.createMessage(botMessage);
+  };
+
   if (message.startsWith('/stock=')) {
     const stooqCode = message.split('/stock=')[1];
-    console.log('stooqCode', stooqCode);
 
     if (stooqCode.length > 10) {
-      botMessage.content = `Hello, ${author}! That seems to be an invalid code. :( Please, use a valid stock code!`;
-      return await MessageService.createMessage(botMessage);
+      return messageByStockBot(
+        `Hello, ${author}! That seems to be an invalid code. :( Please, use a valid stock code!`,
+      );
     }
-    console.log('author', author);
-    botMessage.content = `Hello, ${author}! Let me see if I can find that for you...`;
-    await MessageService.createMessage(botMessage);
+    messageByStockBot(
+      `Hello, ${author}! Let me see if I can find the current value for the "${stooqCode}" stock...`,
+    );
 
     try {
       const stock = await StockBotService.checkStooq(stooqCode);
-      console.log('stock', stock);
 
-      // const results = [];
-
-      const csvP = csvParser(stock.data);
-      console.log('csvP', csvP);
-      const csvS = csvString.parse(stock.data);
-      console.log('csvS', csvS);
+      const arr = csv.parse(stock.data);
+      const stooqValue = arr[1][6];
+      if (stooqValue === 'N/D') {
+        return messageByStockBot(
+          `Unfortunately, I couldn't find any values for "${stooqCode}". Are you sure it's a valid stock code?`,
+        );
+      }
+      botMessage = new Message({
+        author: botUser,
+        channel: channel,
+        content: `${stooqCode.toUpperCase()} quote is $${stooqValue} per share.`,
+      });
+      return await MessageService.createMessage(botMessage);
     } catch (err) {
-      console.log('err', err);
+      botMessage = new Message({
+        author: botUser,
+        channel: channel,
+        content: `There seems to be a problem with retrieving stock quotes from stooq.com :( Please, try again later.`,
+      });
+      return await MessageService.createMessage(botMessage);
     }
+  } else {
+    botMessage = new Message({
+      author: botUser,
+      channel: channel,
+      content: `That's an invalid code. :( Please, use '/stock=<STOCK_CODE>' for me to tell you proper stock values!`,
+    });
+    return await MessageService.createMessage(botMessage);
   }
-
-  await MessageService.createMessage(botMessage);
 };
 
 class MessageController {
@@ -105,7 +117,6 @@ class MessageController {
         content: req.body.content,
       });
 
-      console.log('MessageController -> createMessage -> author', author);
       const createdMessage = await MessageService.createMessage(newMessage);
       if (newMessage.content.startsWith('/')) {
         initiateStockBot(
@@ -168,7 +179,7 @@ class MessageController {
 
     try {
       const allMessages = await MessageService.getMessagesByChannel(channelId);
-      if (allMessages.length > 0) {
+      if (allMessages && allMessages.length > 0) {
         httpUtil.setSuccess(200, 'Messages retrieved.', allMessages);
       } else {
         httpUtil.setSuccess(200, 'No messages found.');
