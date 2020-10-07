@@ -9,10 +9,12 @@ import messageRoutes from './routes/message.routes';
 
 const app: Application = express();
 
-const origin =
-  process.env.NODE_ENV === 'production'
-    ? process.env.PROD_CORS_ORIGIN
-    : process.env.DEV_CORS_ORIGIN;
+let origin;
+if (process.env.NODE_ENV === 'production') {
+  origin = [process.env.PROD_CORS_ORIGIN as string, 'localhost:5000'];
+} else {
+  origin = process.env.DEV_CORS_ORIGIN;
+}
 
 app.use(cors({ origin, credentials: true }));
 
