@@ -101,8 +101,7 @@ class AuthController {
 
         const cookieOptions: CookieOptions = {
           expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
-          secure: process.env.NODE_ENV === 'production',
-          // secure: false,
+          secure: false,
           httpOnly: true,
         };
 
