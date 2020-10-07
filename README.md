@@ -1,155 +1,365 @@
-<p align="center">
-  <a href="" rel="noopener">
-</p>
+# stock-chat-backend
 
-<h1 align="center">node-ts</h1>
+API with Node.js and Typescript for the [StockChat APP](https://github.com/magluf/stock-chat-frontend)
 
-<div align="center">
+## Avalição sobre o desempenho no desafio:
 
-[![Version](https://img.shields.io/github/package-json/v/magluf/node-ts/master)]()&nbsp;&nbsp;&nbsp;
-[![Status](https://img.shields.io/badge/status-active-success.svg)]()&nbsp;&nbsp;&nbsp;
-[![Last Commit](https://img.shields.io/github/last-commit/magluf/node-ts/master)]()&nbsp;&nbsp;&nbsp;
-[![Commit Activity](https://img.shields.io/github/commit-activity/m/magluf/node-ts)]()&nbsp;&nbsp;&nbsp;
+### PROS
 
-</div>
+- Typescript;
+- ESLint;
+- Utilizando a versão mais atual de todas as libs do projeto (excluindo, obviamente, as libs de dependência de outras libs)
+- Scripts de geração de arquivos para produção e de deploy;
+- Scripts de geração de git submodule (infelizmente, o Heroku não aceita submodules, o que fere uma rotina ótima para CI/CD de projetos que poderiam ser compilados pré-deploy.);
+- Boas rotinas de segurança para a proteção de rotas;
+- Boa utilização de APIs e algoritmos para manusear as rotinas de Location;
+
+### CONS
+
+- Sem testes :(
+- A versão mais nova do Sequelize não está otimizada para o Typescript (tão quanto a lib _sequelize-typescript_), o que me forçou a usar JS puro para migrations, models e services.
+- Sem Dockerfile :(
+- Eu estava utilizando uma rotina local (`npm run build:heroku && npm run deploy:heroku`) utilizando scripts próprios e com git subtree para o deploy para o Heroku e infelizmente não tive tempo de configurar um CI/CD no repo.
+
+### Heroku URL:
+
+> https://api-zro.herokuapp.com
+
+### Postman collection das rotas:
+
+> https://www.getpostman.com/collections/227fce696dae1e977d37
 
 ---
 
-<p align="center"> Template project for Node.js + Typescript APIs.
-    <br> 
-</p>
+# _Endpoints:_
 
-## 📝 Table of Contents
+## USERS:
 
-- [About](#about)
-- [Getting Started](#getting_started)
-- [Deployment](#deployment)
-- [Usage](#usage)
-- [Built Using](#built_using)
-- [Suggested typings changes](#typings_changes)
-- [Authors](#authors)
-- [Acknowledgments](#acknowledgement)
-<p align="center">
-  <a href="" rel="noopener">
-</p>
+### _Criar usuário_
 
-## 🧐 About <a name = "about"></a>
+#### Request
 
-This project was born out of learning hunger and to also implement a good starting point for Node.js apps with some other flavours in it (for now, just TypeScript and MongoDB.)
-
-## 🏁 Getting Started <a name = "getting_started"></a>
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See [deployment](#deployment) for notes on how to deploy the project on a live system.
-
-### Prerequisites
-
-#### Node.js v12.x
+`POST /api/v1/users { email, password }`
 
 ```bash
-curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-sudo apt install nodejs
+curl --location --request POST 'https://api-zro.herokuapp.com/api/v1/users' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+                "email": "test@test.test",
+                "password": "test"
+            }'
 ```
 
-### Running the app
+#### Response
 
-#### Install project packages
+```JSON
+{
+    "status": "success",
+    "message": "User Added!",
+    "data": {
+        "id": 1,
+        "email": "test@test.test",
+        "updatedAt": "2020-09-30T10:24:38.816Z",
+        "createdAt": "2020-09-30T10:24:38.816Z"
+    }
+}
+```
+
+---
+
+## AUTH
+
+### - _Login_
+
+#### Request
+
+`POST /api/v1/auth/login { email, password }`
 
 ```bash
-npm i
+curl --location --request POST 'https://api-zro.herokuapp.com/api/v1/auth/login' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+                "email": "test@test.test",
+                "password": "test"
+            }'
 ```
 
-#### And repeat
+#### Response
 
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo.
-
-## 🔧 Running the tests <a name = "tests"></a>
-
-Explain how to run the automated tests for this system.
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
+```JSON
+{
+    "status": "success",
+    "message": "User logged in!",
+    "data": {
+        "token": "xxx"
+    }
+}
 ```
 
-### And coding style tests
+---
 
-Explain what these tests test and why
+## LOCATIONS:
 
+### _Create location_
+
+#### Request
+
+`POST /api/v1/location { name, address }`
+
+```bash
+curl --location --request POST 'https://api-zro.herokuapp.com/api/v1/users' \
+--header 'Authorization: Bearer JSONWEBTOKEN' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+                "name": "Dom Black",
+                "address": "recife boa viagem"
+            }'
 ```
-Give an example
+
+> Uma string com os dois parâmetros acima ('Dom Black recife boa viagem') será utilizada na Geoposition API do Google. Quanto mais detalhes forem passados sobre o local (CEP, bairro, cidade, estado...), melhor será a chance de obter o lugar exato. O campo _name_ é utilizado para setar a coluna _name_ da tabela Locations do DB.
+
+#### Response
+
+```JSON
+{
+    "status": "success",
+    "message": "Location Added!",
+    "data": {
+        "id": 11,
+        "userId": 2,
+        "name": "Dom Black",
+        "latitude": -8.1085015,
+        "longitude": -34.8896344,
+        "country": "Brazil",
+        "countryCode": "BR",
+        "city": "Recife",
+        "zipcode": "51020-010",
+        "streetName": "Rua dos Navegantes",
+        "streetNumber": "2959",
+        "updatedAt": "2020-09-30T23:35:55.461Z",
+        "createdAt": "2020-09-30T23:35:55.461Z"
+    }
+}
 ```
 
-## 🎈 Usage <a name="usage"></a>
+---
 
-Add notes about how to use the system.
+### - _Listar locations ordenadas por nome_
 
-## 🚀 Deployment <a name = "deployment"></a>
+#### Request
 
-Add additional notes about how to deploy this on a live system.
+`GET /api/v1/auth/locations/all/list`
 
-## ⛏️ Built Using <a name = "built_using"></a>
+```bash
+curl --location --request GET 'https://api-zro.herokuapp.com/api/v1/locations/all/list' \
+--header 'Authorization: Bearer JSONWEBTOKEN'
+```
 
-- [MongoDB](https://www.mongodb.com/) - Database
-- [Express](https://expressjs.com/) - Server Framework
-- [node.js](https://nodejs.org/en/) - Server Environment
-- [ts-node](https://github.com/TypeStrong/ts-node) - TypeScript execution and REPL for node.js
+#### Response
 
-## 🪄 Suggested typings changes <a name = "typings_changes"></a>
+```JSON
+{
+    "status": "success",
+    "message": "Locations retrieved.",
+    "data": [
+        {
+            "id": 11,
+            "userId": 2,
+            "name": "Dom Black",
+            "latitude": -8.1085015,
+            "longitude": -34.8896344,
+            "country": "Brazil",
+            "countryCode": "BR",
+            "city": "Recife",
+            "zipcode": "51020-010",
+            "streetName": "Rua dos Navegantes",
+            "streetNumber": "2959",
+            "createdAt": "2020-09-30T23:35:55.461Z",
+            "updatedAt": "2020-09-30T23:35:55.461Z"
+        },
+        {
+            "id": 10,
+            "userId": 2,
+            "name": "Fervo Coffee Shop",
+            "latitude": -8.1397315,
+            "longitude": -34.9078277,
+            "country": "Brazil",
+            "countryCode": "BR",
+            "city": "Recife",
+            "zipcode": "51030-320",
+            "streetName": "Rua Doutor Luiz Inácio Pessoa de Melo",
+            "streetNumber": "350",
+            "createdAt": "2020-09-30T23:33:01.868Z",
+            "updatedAt": "2020-09-30T23:33:01.868Z"
+        },
+        {
+            "id": 8,
+            "userId": 2,
+            "name": "Shopping Plaza Casa Forte",
+            "latitude": -8.037011099999999,
+            "longitude": -34.9125792,
+            "country": "Brazil",
+            "countryCode": "BR",
+            "city": "Pernambuco",
+            "zipcode": "52060-615",
+            "streetName": "Rua Doutor João Santos Filho",
+            "streetNumber": "255",
+            "createdAt": "2020-09-30T22:54:15.641Z",
+            "updatedAt": "2020-09-30T22:54:15.641Z"
+        },
+    ]
+}
+```
 
-This required changes to the local `node_modules` version of `@types` libs, which can't be represented on repos.
+---
 
-> `/@types/mongoose/index.d.ts`
->
-> ```typescript
-> // from
-> new(doc?: any): T;
->
-> // to
-> new(doc?: Omit<T, keyof Document>): T;
-> ```
->
-> This allows for type checking when creating models from Schemas.
->
-> An interface is needed for proper intellisense and type checking:
->
-> ```typescript
-> interface IUser extends Document {
->   username: string;
->   password: string;
-> }
->
-> const userSchema: Schema = new Schema({
->   username: {
->     type: String,
->     required: true,
->     unique: true,
->   },
->   email: {
->     type: String,
->     required: 'Email adress is required.',
->     trim: true,
->     lowercase: true,
->     unique: true,
->     match: [emailRegex, 'Email adress is invalid.'],
->   },
-> });
->
-> const User = model<IUser>('User', userSchema);
->
-> const testUser = new User({
->   // intellise and typechecking available here.
->   username: 'User Name',
->   email: 'user@email.com',
-> });
-> ```
+### - _Listar locations ordenadas por distância_
 
-## ✍️ Authors <a name = "authors"></a>
+> Foi utilizada a lib _geoip-lite_ para obter o IP da requisição para, então, determinar a latitude e longitude utilizadas na comparação de proximidade. Caso não seja possível estabelecer o IP, esse endpoint retorna a lista de locations ordenada por nome.
 
-- [@magluf](https://github.com/magluf) - Idea & Initial work
+#### Request
+
+`GET /api/v1/auth/locations/all/map`
+
+```bash
+curl --location --request GET 'https://api-zro.herokuapp.com/api/v1/locations/all/map' \
+--header 'Authorization: Bearer JSONWEBTOKEN'
+```
+
+#### Response
+
+```JSON
+{
+    "status": "success",
+    "message": "Locations retrieved.",
+    "data": [
+        {
+            "id": 10,
+            "userId": 2,
+            "name": "Fervo Coffee Shop",
+            "latitude": -8.1397315,
+            "longitude": -34.9078277,
+            "country": "Brazil",
+            "countryCode": "BR",
+            "city": "Recife",
+            "zipcode": "51030-320",
+            "streetName": "Rua Doutor Luiz Inácio Pessoa de Melo",
+            "streetNumber": "350",
+            "createdAt": "2020-09-30T23:33:01.868Z",
+            "updatedAt": "2020-09-30T23:33:01.868Z"
+        },
+        {
+            "id": 6,
+            "userId": 2,
+            "name": "Shopping Recife",
+            "latitude": -8.119071600000002,
+            "longitude": -34.9050808,
+            "country": "Brazil",
+            "countryCode": "BR",
+            "city": null,
+            "zipcode": "51020-900",
+            "streetName": "Rua Padre Carapuceiro",
+            "streetNumber": "777",
+            "createdAt": "2020-09-30T22:51:28.123Z",
+            "updatedAt": "2020-09-30T22:51:28.123Z"
+        },
+        {
+            "id": 11,
+            "userId": 2,
+            "name": "Dom Black",
+            "latitude": -8.1085015,
+            "longitude": -34.8896344,
+            "country": "Brazil",
+            "countryCode": "BR",
+            "city": "Recife",
+            "zipcode": "51020-010",
+            "streetName": "Rua dos Navegantes",
+            "streetNumber": "2959",
+            "createdAt": "2020-09-30T23:35:55.461Z",
+            "updatedAt": "2020-09-30T23:35:55.461Z"
+        }
+    ]
+}
+```
+
+---
+
+## RATINGS:
+
+### _Criar rating para location_
+
+#### Request
+
+`POST /api/v1/users/:locationId`
+
+```bash
+curl --location --request POST 'https://api-zro.herokuapp.com/api/v1/ratings/:locationId' \
+--header 'Authorization: Bearer JSONWEBTOKEN' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+                "rating": 3,
+                "comment": "Average."
+            }'
+```
+
+#### Response
+
+```JSON
+{
+    "status": "success",
+    "message": "Rating Added!",
+    "data": {
+        "id": 4,
+        "userId": 2,
+        "locationId": 1,
+        "rating": 3,
+        "comment": "Average",
+        "updatedAt": "2020-10-01T00:51:07.973Z",
+        "createdAt": "2020-10-01T00:51:07.973Z"
+    }
+}
+```
+
+---
+
+### _Listar todas as avaliações de um local_
+
+#### Request
+
+`GET /api/v1/users/:locationId`
+
+```bash
+curl --location --request GET 'https://api-zro.herokuapp.com/api/v1/ratings/:locationId' \
+--header 'Authorization: Bearer JSONWEBTOKEN' \
+```
+
+#### Response
+
+```JSON
+{
+    "status": "success",
+    "message": "Ratings retrieved.",
+    "data": [
+        {
+            "id": 3,
+            "locationId": 1,
+            "userId": 2,
+            "comment": "Average",
+            "rating": 3,
+            "createdAt": "2020-10-01T00:05:37.009Z",
+            "updatedAt": "2020-10-01T00:05:37.009Z"
+        },
+        {
+            "id": 4,
+            "locationId": 1,
+            "userId": 4,
+            "comment": "Very good",
+            "rating": 5,
+            "createdAt": "2020-10-01T00:51:07.973Z",
+            "updatedAt": "2020-10-01T00:51:07.973Z"
+        }
+    ]
+}
+```
+
+---

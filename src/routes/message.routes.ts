@@ -10,7 +10,7 @@ router
   .get(protect, MessageController.getAllMessages);
 
 router
-  .route('/:channelId')
+  .route('/channel/:channelId')
   .get(protect, MessageController.getMessagesByChannel);
 
 export default router;

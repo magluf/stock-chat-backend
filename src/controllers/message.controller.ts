@@ -59,7 +59,9 @@ const initiateStockBot = async (
       botMessage = new Message({
         author: botUser,
         channel: channel,
-        content: `${stooqCode.toUpperCase()} quote is $${stooqValue} per share.`,
+        content: `${stooqCode.toUpperCase()} quote is $${parseFloat(
+          stooqValue,
+        ).toFixed(2)} per share.`,
       });
       return await MessageService.createMessage(botMessage);
     } catch (err) {
