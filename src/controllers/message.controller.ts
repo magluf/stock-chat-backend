@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import * as csv from 'csv-string';
-import { IChannel } from '../model/channel.model';
-import Message, { IMessage } from '../model/message.model';
+import Message from '../model/message.model';
 import ChannelService from '../services/channel.service';
 import MessageService from '../services/message.service';
 import StockBotService from '../services/stockBot.service';
@@ -11,39 +10,46 @@ import { RequestWithBody } from '../utils/interfaces';
 
 const httpUtil = new HttpUtil();
 
+export interface MessageBody {
+  authorId: string;
+  channelId: string;
+  content: string;
+  token?: string;
+}
+
 const initiateStockBot = async (
-  author: string,
-  channel: IChannel,
+  username: string,
+  channelId: string,
   message: string,
 ) => {
+  message = message.toLocaleLowerCase();
+
   const botUser = await UserService.getFullUser(
     process.env.STOCK_BOT_ID as string,
   );
-  let botMessage = new Message({
-    author: botUser,
-    channel: channel,
-    content: '',
-  });
+  // console.log(`botUser`, botUser);
 
-  const messageByStockBot = async (text: string) => {
-    botMessage = new Message({
-      author: botUser,
-      channel: channel,
+  const sendMessageByStockBot = async (text: string) => {
+    const botMessage = new Message({
+      authorId: botUser?._id,
+      channelId: channelId,
       content: text,
     });
+    // console.log(`sendMessageByStockBot -> botMessage`, botMessage);
     return await MessageService.createMessage(botMessage);
   };
 
   if (message.startsWith('/stock=')) {
     const stooqCode = message.split('/stock=')[1];
+    // console.log(`stooqCode`, stooqCode);
 
     if (stooqCode.length > 10) {
-      return messageByStockBot(
-        `Hello, ${author}! That seems to be an invalid code. :( Please, use a valid stock code!`,
+      return sendMessageByStockBot(
+        `Hello, ${username}! That seems to be an invalid code. :( Please, use a valid stock code!`,
       );
     }
-    messageByStockBot(
-      `Hello, ${author}! Let me see if I can find the current value for the "${stooqCode}" stock...`,
+    sendMessageByStockBot(
+      `Hello, ${username}! Let me see if I can find the current value for the "${stooqCode}" stock...`,
     );
 
     try {
@@ -52,51 +58,42 @@ const initiateStockBot = async (
       const arr = csv.parse(stock.data);
       const stooqValue = arr[1][6];
       if (stooqValue === 'N/D') {
-        return messageByStockBot(
+        return sendMessageByStockBot(
           `Unfortunately, I couldn't find any values for "${stooqCode}". Are you sure it's a valid stock code?`,
         );
       }
-      botMessage = new Message({
-        author: botUser,
-        channel: channel,
-        content: `${stooqCode.toUpperCase()} quote is $${parseFloat(
-          stooqValue,
-        ).toFixed(2)} per share.`,
-      });
-      return await MessageService.createMessage(botMessage);
+      return sendMessageByStockBot(
+        `${stooqCode.toUpperCase()} quote is $${parseFloat(stooqValue).toFixed(
+          2,
+        )} per share.`,
+      );
     } catch (err) {
-      botMessage = new Message({
-        author: botUser,
-        channel: channel,
-        content: `There seems to be a problem with retrieving stock quotes from stooq.com :( Please, try again later.`,
-      });
-      return await MessageService.createMessage(botMessage);
+      return sendMessageByStockBot(
+        `There seems to be a problem with retrieving stock quotes from stooq.com :( Please, try again later.`,
+      );
     }
   } else {
-    botMessage = new Message({
-      author: botUser,
-      channel: channel,
-      content: `That's an invalid code. :( Please, use '/stock=<STOCK_CODE>' for me to tell you proper stock values!`,
-    });
-    return await MessageService.createMessage(botMessage);
+    return sendMessageByStockBot(
+      `That's an invalid code. :( Please, use '/stock=<STOCK_CODE>' for me to tell you proper stock values!`,
+    );
   }
 };
 
 class MessageController {
-  static async createMessage(req: RequestWithBody<IMessage>, res: Response) {
+  static async createMessage(req: RequestWithBody<MessageBody>, res: Response) {
     if (!req.body) {
       httpUtil.setError(400, 'Incomplete info.');
       return httpUtil.send(res);
     }
 
-    if (!req.body.author || !req.body.channel || !req.body.content) {
+    if (!req.body.authorId || !req.body.channelId || !req.body.content) {
       httpUtil.setError(400, 'Incomplete info.');
       return httpUtil.send(res);
     }
 
     try {
       const author = await UserService.getFullUser(
-        (req.body.author as unknown) as string,
+        (req.body.authorId as unknown) as string,
       );
 
       if (!author) {
@@ -105,7 +102,7 @@ class MessageController {
       }
 
       const channel = await ChannelService.getChannelById(
-        (req.body.channel as unknown) as string,
+        (req.body.channelId as unknown) as string,
       );
 
       if (!channel) {
@@ -114,30 +111,28 @@ class MessageController {
       }
 
       const newMessage = new Message({
-        author: author,
-        channel: channel,
+        authorId: author._id,
+        channelId: channel._id,
         content: req.body.content,
       });
+      // console.log(
+      //   `MessageController -> createMessage -> newMessage`,
+      //   newMessage,
+      // );
 
       const createdMessage = await MessageService.createMessage(newMessage);
       if (newMessage.content.startsWith('/')) {
         initiateStockBot(
-          newMessage.author.username as string,
-          newMessage.channel,
+          author.username as string,
+          newMessage.channelId,
           newMessage.content,
         );
       }
 
-      createdMessage.author.password = undefined;
-      createdMessage.author.salt = undefined;
-      createdMessage.author.email = undefined;
-      createdMessage.author.username = undefined;
-
-      createdMessage.channel.creator = undefined;
-
       httpUtil.setSuccess(201, 'Message Added!', createdMessage);
       return httpUtil.send(res);
     } catch (error) {
+      // console.log(`MessageController -> createMessage -> error`, error);
       httpUtil.setError(400, error);
       return httpUtil.send(res);
     }
@@ -181,8 +176,26 @@ class MessageController {
 
     try {
       const allMessages = await MessageService.getMessagesByChannel(channelId);
-      if (allMessages && allMessages.length > 0) {
-        httpUtil.setSuccess(200, 'Messages retrieved.', allMessages);
+
+      const resMessagesPromises = allMessages.map(async (message) => {
+        const user = await UserService.getUserById(message.authorId);
+        const m = {
+          _id: message._id,
+          authorId: message.authorId,
+          channel: message.channelId,
+          content: message.content,
+          createAt: message.createAt,
+          updatedAt: message.updatedAt,
+        };
+        return {
+          ...m,
+          username: user ? user.username : '[USER DELETED]',
+        };
+      });
+      const resMessages = await Promise.all(resMessagesPromises);
+
+      if (resMessages.length > 0) {
+        httpUtil.setSuccess(200, 'Messages retrieved.', resMessages);
       } else {
         httpUtil.setSuccess(200, 'No messages found.');
       }

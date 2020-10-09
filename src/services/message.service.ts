@@ -9,8 +9,9 @@ class MessageService {
     return await Message.find();
   }
 
-  static async getMessagesByChannel(channelId: string) {
-    return await Message.find({ 'channel._id': channelId })
+  static async getMessagesByChannel(channelId: string): Promise<IMessage[]> {
+    // return await Message.find()
+    return await Message.find({ channelId: channelId })
       .sort('-createdAt')
       .limit(50);
   }
