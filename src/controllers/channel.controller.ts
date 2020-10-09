@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import Channel, { IChannel } from '../model/channel.model';
 import ChannelService from '../services/channel.service';
-import UserService from '../services/user.service';
 import HttpUtil from '../utils/http.util';
 import { RequestWithBody } from '../utils/interfaces';
 
@@ -14,34 +13,18 @@ class ChannelController {
       return httpUtil.send(res);
     }
 
-    if (!req.body.name || !req.body.creator || !req.body.details) {
+    if (!req.body.name || !req.body.details) {
       httpUtil.setError(400, 'Incomplete info.');
       return httpUtil.send(res);
     }
 
     try {
-      const creator = await UserService.getFullUser(
-        (req.body.creator as unknown) as string,
-      );
-
-      if (!creator) {
-        httpUtil.setError(401, 'Credentials invalid');
-        return httpUtil.send(res);
-      }
-
       const newChannel = new Channel({
-        creator: creator,
         name: req.body.name,
         details: req.body.details,
       });
 
       const createdChannel = await ChannelService.createChannel(newChannel);
-
-      if (createdChannel.creator) {
-        createdChannel.creator.password = undefined;
-        createdChannel.creator.salt = undefined;
-        createdChannel.creator.email = undefined;
-      }
 
       httpUtil.setSuccess(201, 'Channel Added!', createdChannel);
       return httpUtil.send(res);

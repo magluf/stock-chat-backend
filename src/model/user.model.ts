@@ -11,7 +11,7 @@ export interface IUser extends Document {
   salt: string | undefined;
 }
 
-export const userSchema: Schema = new Schema(
+const userSchema: Schema = new Schema(
   {
     username: {
       type: String,

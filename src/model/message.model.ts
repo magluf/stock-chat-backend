@@ -1,22 +1,22 @@
-import { Schema, model, Document } from 'mongoose';
-import { channelSchema, IChannel } from './channel.model';
-import { IUser, userSchema } from './user.model';
+import mongoose, { Schema, model, Document } from 'mongoose';
 
 export interface IMessage extends Document {
-  author: IUser;
-  channel: IChannel;
+  authorId: string;
+  channelId: string;
   content: string;
+  createAt?: string;
+  updatedAt?: string;
 }
 
 const messageSchema: Schema = new Schema(
   {
-    author: {
-      type: userSchema,
-      required: true,
+    authorId: {
+      type: mongoose.Types.ObjectId,
+      ref: 'User',
     },
-    channel: {
-      type: channelSchema,
-      required: true,
+    channelId: {
+      type: mongoose.Types.ObjectId,
+      ref: 'Channel',
     },
     content: {
       type: String,

@@ -4,10 +4,7 @@ import { protect } from '../controllers/auth.controller';
 
 const router = Router();
 
-router
-  .route('/')
-  .post(protect, ChannelController.createChannel)
-  .get(protect, ChannelController.getAllChannels);
+router.route('/').get(protect, ChannelController.getAllChannels);
 
 router.route('/:id').get(protect, ChannelController.getChannel);
 

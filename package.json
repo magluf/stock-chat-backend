@@ -6,7 +6,6 @@
   "scripts": {
     "start": "nodemon src/server.ts",
     "start:compiled": "npm run build:prod && node dist/server.js",
-    "postinstall": "npm run build:prod",
     "prod": "node dist/server.js",
     "build:prod": "tsc -p .",
     "deploy:heroku": "npm run build:prod && yes | cp -a dist/. ../stock-chat-api/ && cd ../stock-chat-api/ && git add . && git commit -m 'Heroku deploy.' && git push && cd ../node-ts",
