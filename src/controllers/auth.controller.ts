@@ -86,7 +86,6 @@ class AuthController {
     try {
       const user = await UserService.getUserByUsername(username);
       if (!user) {
-        httpUtil.setError(401, 'Credentials invalid');
         return httpUtil.send(res);
       }
 
@@ -105,12 +104,22 @@ class AuthController {
           httpOnly: true,
         };
 
-        res.cookie('jwt', token, cookieOptions);
-        httpUtil.setSuccess(201, 'User logged in!', {
+        const response = {
           _id: user._id,
           username: user.username,
           email: user.email,
-        });
+        };
+
+        let herokuResponse;
+        if (res.locals.heroku) {
+          herokuResponse = {
+            ...response,
+            token: token,
+          };
+        } else {
+          res.cookie('jwt', token, cookieOptions);
+        }
+        httpUtil.setSuccess(201, 'User logged in!', herokuResponse || response);
         return httpUtil.send(res);
       }
 
