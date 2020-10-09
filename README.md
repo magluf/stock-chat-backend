@@ -2,17 +2,31 @@
 
 API with Node.js and Typescript for the [StockChat APP](https://github.com/magluf/stock-chat-frontend).
 
-### App on Heroku:
+## Deployed app on Heroku:
+
+> https://stock-chat-apa.herokuapp.com/
+
+### Deployed API on Heroku:
 
 > https://stock-chat-api.herokuapp.com/api/v1
 
-### API on Heroku:
-
-> https://stock-chat-api.herokuapp.com/api/v1
-
-### Postman collection das rotas:
+### Postman collection for route testing:
 
 > https://www.getpostman.com/collections/227fce696dae1e977d37
+
+---
+
+# BONUS CHALLENGE TASKS ACCOMPLISHED:
+
+- Two chat rooms;
+- Unit testing creating a user with a not unique username;
+- Errors handled: invalid commands (only the `/stock=` command is available), invalid stock code and issues with retrieving data from [stooq.com](stooq.com);
+
+# PERCEIVED ISSUES:
+
+- Heroku doesn't handle cookies well on Chrome, so I've decided to check if the app is running on Heroku and use the auth token on headers then. Cookies seemed to work fine on Firefox, even if on Heroku.
+
+- There are /major/ undocumented issues trying to implement sockets with mongoose during development, so I had to make a decision to diverge away from it, even if it's the obvious answer for a chat app. I had already set up most of the work with MongoDB and mongoose, so I didn't have the time to change approaches. So, I've implement polling (querying the database for new messages every 1) instead. Even if so, the technic for polling using hooks with React is quite good.
 
 ---
 

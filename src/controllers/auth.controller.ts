@@ -86,7 +86,7 @@ class AuthController {
     try {
       const user = await UserService.getUserByUsername(username);
       if (!user) {
-        httpUtil.setError(400, 'Incomplete info.');
+        httpUtil.setError(400, 'Credentials invalid.');
         return httpUtil.send(res);
       }
 
