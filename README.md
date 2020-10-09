@@ -12,7 +12,7 @@ API with Node.js and Typescript for the [StockChat APP](https://github.com/maglu
 
 ### Postman collection for route testing:
 
-> https://www.getpostman.com/collections/227fce696dae1e977d37
+> https://www.getpostman.com/collections/616855defe343365b4b1
 
 ---
 
@@ -93,7 +93,9 @@ curl --location --request POST 'https://stock-chat-api.herokuapp.com/api/v1/auth
     "status": "success",
     "message": "User logged in!",
     "data": {
-        "token": "xxx"
+        "_id": "5f80ef9f5a416d00179d17ea",
+        "username": "test",
+        "email": "test@asf.com"
     }
 }
 ```
@@ -120,9 +122,12 @@ curl --location --request POST 'https://stock-chat-api.herokuapp.com/api/v1/auth
     "status": "success",
     "message": "User logged in!",
     "data": {
-        "_id": "5f7e0bd2af805100172f4403",
+        "_id": "5f80ef9f5a416d00179d17ea",
         "username": "test",
-        "email": "test@asf.com"
+        "email": "test@asf.com",
+        "createdAt": "2020-10-09T23:17:51.533Z",
+        "updatedAt": "2020-10-09T23:17:51.533Z",
+        "__v": 0
     }
 }
 ```
@@ -135,15 +140,15 @@ curl --location --request POST 'https://stock-chat-api.herokuapp.com/api/v1/auth
 
 #### Request
 
-`POST /api/v1/messages/ { author[id], channel[id], content }`
+`POST /api/v1/messages/ { authorId, channelId, content }`
 
 ```bash
 curl --location --request POST 'https://stock-chat-api.herokuapp.com/api/v1/messages/' \
 --header 'Content-Type: application/json' \
 --header 'Cookie: jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmN2UwYmQyYWY4MDUxMDAxNzJmNDQwMyIsImlhdCI6MTYwMjA5NjQ5NSwiZXhwIjoxNjAyMTgyODk1fQ.YA0sDwt_1sYoXtBELsYlyrAOQSLIBR8sfgdLNXrS-tU' \
 --data-raw '{
-                "author": "5f7e06fe8dd4f90017eb274a",
-                "channel": "5f7d63d29672610b98fe42cc",
+                "authorId": "5f7e06fe8dd4f90017eb274a",
+                "channelId": "5f7d63d29672610b98fe42cc",
                 "content": "Hello!"
             }'
 ```
@@ -155,24 +160,12 @@ curl --location --request POST 'https://stock-chat-api.herokuapp.com/api/v1/mess
     "status": "success",
     "message": "Message Added!",
     "data": {
-        "_id": "5f7e0dfdaf805100172f4404",
-        "author": {
-            "_id": "5f7e06fe8dd4f90017eb274a",
-            "createdAt": "2020-10-07T18:20:46.521Z",
-            "updatedAt": "2020-10-07T18:20:46.521Z",
-            "__v": 0
-        },
-        "channel": {
-            "_id": "5f7d63d29672610b98fe42cc",
-            "name": "general",
-            "details": "Generalities.",
-            "createdAt": "2020-10-07T06:44:35.147Z",
-            "updatedAt": "2020-10-07T06:44:35.147Z",
-            "__v": 0
-        },
+        "_id": "5f80efbd5a416d00179d17eb",
+        "authorId": "5f80ef9f5a416d00179d17ea",
+        "channelId": "5f7d63d29672610b98fe42cc",
         "content": "Hello!",
-        "createdAt": "2020-10-07T18:50:37.611Z",
-        "updatedAt": "2020-10-07T18:50:37.611Z",
+        "createdAt": "2020-10-09T23:18:21.935Z",
+        "updatedAt": "2020-10-09T23:18:21.935Z",
         "__v": 0
     }
 }
@@ -197,28 +190,15 @@ curl --location --request GET 'https://stock-chat-api.herokuapp.com/api/v1/messa
     "message": "Messages retrieved.",
     "data": [
         {
-            "_id": "5f7e0dfdaf805100172f4404",
-            "author": {
-                "_id": "5f7e06fe8dd4f90017eb274a",
-                "username": "testuser",
-                "email": "ffff@asf.com",
-                "createdAt": "2020-10-07T18:20:46.521Z",
-                "updatedAt": "2020-10-07T18:20:46.521Z",
-                "__v": 0
-            },
-            "channel": {
-                "_id": "5f7d63d29672610b98fe42cc",
-                "name": "general",
-                "details": "Generalities.",
-                "createdAt": "2020-10-07T06:44:35.147Z",
-                "updatedAt": "2020-10-07T06:44:35.147Z",
-                "__v": 0
-            },
+            "_id": "5f80efbd5a416d00179d17eb",
+            "authorId": "5f80ef9f5a416d00179d17ea",
+            "channel": "5f7d63d29672610b98fe42cc",
             "content": "Hello!",
-            "createdAt": "2020-10-07T18:50:37.611Z",
-            "updatedAt": "2020-10-07T18:50:37.611Z",
-            "__v": 0
+            "updatedAt": "2020-10-09T23:18:21.935Z",
+            "username": "test"
         }
     ]
 }
 ```
+
+## - _StockBot_
