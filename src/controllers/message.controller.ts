@@ -27,7 +27,6 @@ const initiateStockBot = async (
   const botUser = await UserService.getFullUser(
     process.env.STOCK_BOT_ID as string,
   );
-  // console.log(`botUser`, botUser);
 
   const sendMessageByStockBot = async (text: string) => {
     const botMessage = new Message({
@@ -35,13 +34,11 @@ const initiateStockBot = async (
       channelId: channelId,
       content: text,
     });
-    // console.log(`sendMessageByStockBot -> botMessage`, botMessage);
     return await MessageService.createMessage(botMessage);
   };
 
   if (message.startsWith('/stock=')) {
     const stooqCode = message.split('/stock=')[1];
-    // console.log(`stooqCode`, stooqCode);
 
     if (stooqCode.length > 10) {
       return sendMessageByStockBot(
@@ -115,22 +112,18 @@ class MessageController {
         channelId: channel._id,
         content: req.body.content,
       });
-      // console.log(
-      //   `MessageController -> createMessage -> newMessage`,
-      //   newMessage,
-      // );
 
-      const createdMessage = await MessageService.createMessage(newMessage);
       if (newMessage.content.startsWith('/')) {
         initiateStockBot(
           author.username as string,
           newMessage.channelId,
           newMessage.content,
         );
+      } else {
+        const createdMessage = await MessageService.createMessage(newMessage);
+        httpUtil.setSuccess(201, 'Message Added!', createdMessage);
+        return httpUtil.send(res);
       }
-
-      httpUtil.setSuccess(201, 'Message Added!', createdMessage);
-      return httpUtil.send(res);
     } catch (error) {
       // console.log(`MessageController -> createMessage -> error`, error);
       httpUtil.setError(400, error);
